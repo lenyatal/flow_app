@@ -102,11 +102,12 @@ class MusicHandler extends BaseAudioHandler with SeekHandler {
   Future<void> prepareAndPlay(List<dynamic> list, int index) async {
     queueList = list;
     final track = queueList[index];
+
     mediaItem.add(MediaItem(
       id: track['id'].toString(),
       album: "Flow",
-      title: track['title'],
-      artist: track['user']['username'],
+      title: track['title'] ?? "Untitled",
+      artist: track['user']?['username'] ?? "Unknown",
       duration: Duration(milliseconds: track['duration']),
       artUri: Uri.parse(
           track['artwork_url']?.toString().replaceAll('large', 't500x500') ??
@@ -114,13 +115,28 @@ class MusicHandler extends BaseAudioHandler with SeekHandler {
     ));
 
     try {
-      final sUrl =
+      // 1. Пытаемся получить прямую ссылку
+      var sUrl =
           "${track['media']['transcodings'][0]['url']}?client_id=$clientId";
-      final sRes = await http.get(Uri.parse(sUrl));
-      final direct = json.decode(sRes.body)['url'];
-      await _player.setUrl(direct);
+      var sRes = await http.get(Uri.parse(sUrl));
+
+      // 2. Если ID протух (401/403), обновляем его и пробуем еще раз
+      if (sRes.statusCode == 401 || sRes.statusCode == 403) {
+        print("ID протух, обновляемся...");
+        await _fetchId();
+        sUrl =
+            "${track['media']['transcodings'][0]['url']}?client_id=$clientId";
+        sRes = await http.get(Uri.parse(sUrl));
+      }
+
+      final data = json.decode(sRes.body);
+      final directUrl = data['url'];
+
+      await _player.setUrl(directUrl);
       _player.play();
-    } catch (_) {}
+    } catch (e) {
+      print("Ошибка воспроизведения: $e");
+    }
   }
 
   @override
@@ -238,7 +254,7 @@ class _MainNavigationState extends State<MainNavigation> {
               index: _screenIdx,
               children: [
                 _playlistsScreen(),
-                _searchView(), // Используем поиск как главный Flow экран
+                _searchView(),
                 _favorites(),
                 _settingsView(),
               ],
@@ -247,7 +263,6 @@ class _MainNavigationState extends State<MainNavigation> {
           const _M3MiniPlayer(),
         ],
       ),
-      // Умная кнопка FAB
       floatingActionButton: _screenIdx == 0
           ? StreamBuilder<MediaItem?>(
               stream: _audioHandler?.mediaItem,
