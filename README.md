@@ -1,7 +1,6 @@
-# flow_app
+# Flow
 
-A new Flutter project.
-
+little player made with flutter and vibecode (end localisation wiil be soon, wait plz
 ## Getting Started
 
 This project is a starting point for a Flutter application.
