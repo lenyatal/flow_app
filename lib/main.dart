@@ -9,6 +9,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
 
 MusicHandler? _audioHandler;
 bool showBlobs = true;
@@ -506,8 +507,14 @@ class MusicHandler extends BaseAudioHandler with SeekHandler {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
     _player.playbackEventStream.map(_transformEvent).pipe(playbackState);
-    _player.playerStateStream.listen((s) {
-      if (s.processingState == ProcessingState.completed) skipToNext();
+    _player.playerStateStream.listen((s) async {
+      if (s.processingState == ProcessingState.completed) {
+        // Даже если мы в фоне — ждём 0.3 сек и будим аудиосессию
+        await Future.delayed(const Duration(milliseconds: 300));
+        final session = await AudioSession.instance;
+        await session.setActive(true);
+        skipToNext();
+      }
     });
     await _fetchId();
     await _loadStorage();
@@ -1006,7 +1013,7 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 120),
               child: Text(
-                'Flow 092build',
+                'Flow 093build',
                 style: const TextStyle(color: LG.textTertiary, fontSize: 14),
               ),
             ),
