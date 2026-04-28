@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 MusicHandler? _audioHandler;
 bool showBlobs = true;
@@ -963,6 +964,38 @@ class _MainNavigationState extends State<MainNavigation> {
                   _LiquidSwitch(
                     value: showBlobs,
                     onChanged: (v) => setState(() => showBlobs = v),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GlassBox(
+              borderRadius: LG.rLarge,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('отключить Liquid Glass',
+                            style: TextStyle(
+                                color: LG.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500)),
+                        SizedBox(height: 2),
+                        Text('Убирает blur эффекты',
+                            style: TextStyle(
+                                color: LG.textSecondary, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  _LiquidSwitch(
+                    value: !showBlobs,
+                    onChanged: (v) => setState(() => showBlobs = !v),
                   ),
                 ],
               ),
