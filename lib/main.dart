@@ -1006,7 +1006,7 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 120),
               child: Text(
-                'Flow 0.4.1',
+                'Flow 092build',
                 style: const TextStyle(color: LG.textTertiary, fontSize: 14),
               ),
             ),
